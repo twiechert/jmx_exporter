@@ -4,9 +4,11 @@ import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
@@ -82,6 +84,10 @@ public class JavaAgent {
 
         if (!matched) {
             throw new IllegalArgumentException("Malformed arguments - " + args);
+        }
+
+        if(new HashSet<>(configList.stream().map(c -> c.host).collect(Collectors.toList())).size() < configList.size()) {
+            throw new IllegalArgumentException("Must not specify two exporters with same ifc/port pair - " + args);
         }
 
         return configList.toArray(new Config[configList.size()]);

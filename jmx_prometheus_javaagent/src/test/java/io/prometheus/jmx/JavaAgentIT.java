@@ -188,6 +188,14 @@ public class JavaAgentIT {
         Assert.assertEquals("127.0.0.2", configs[1].host);
         Assert.assertEquals("\\Windows\\Local\\Drive\\Path\\config.yaml", configs[1].file);
         Assert.assertEquals(8081, configs[1].port);
+
+        try {
+            configs = JavaAgent.parseConfig("127.0.0.1:8080:C:\\Windows\\Path\\config.yaml|127.0.0.1:8080:\\Windows\\Local\\Drive\\Path\\config.yaml", DEFAULT_HOST);
+            Assert.fail("Invalid exception should have thrown exception.");
+        } catch (IllegalArgumentException iae) {
+
+        }
+
     }
 
     /**
