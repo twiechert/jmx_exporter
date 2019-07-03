@@ -129,48 +129,65 @@ public class JavaAgentIT {
     public void testAgentStringParsing() {
         final String DEFAULT_HOST = "0.0.0.0";
 
-        JavaAgent.Config config = JavaAgent.parseConfig("8080:config.yaml", DEFAULT_HOST);
-        Assert.assertEquals(DEFAULT_HOST, config.host);
-        Assert.assertEquals("config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        JavaAgent.Config[] configs = JavaAgent.parseConfig("8080:config.yaml", DEFAULT_HOST);
+        Assert.assertEquals(DEFAULT_HOST, configs[0].host);
+        Assert.assertEquals("config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
 
-        config = JavaAgent.parseConfig("8080:/unix/path/config.yaml", DEFAULT_HOST);
-        Assert.assertEquals(DEFAULT_HOST, config.host);
-        Assert.assertEquals("/unix/path/config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        configs = JavaAgent.parseConfig("8080:/unix/path/config.yaml", DEFAULT_HOST);
+        Assert.assertEquals(DEFAULT_HOST, configs[0].host);
+        Assert.assertEquals("/unix/path/config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
 
-        config = JavaAgent.parseConfig("google.com:8080:/unix/path/config.yaml", DEFAULT_HOST);
-        Assert.assertEquals("google.com", config.host);
-        Assert.assertEquals("/unix/path/config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        configs = JavaAgent.parseConfig("google.com:8080:/unix/path/config.yaml", DEFAULT_HOST);
+        Assert.assertEquals("google.com", configs[0].host);
+        Assert.assertEquals("/unix/path/config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
 
-        config = JavaAgent.parseConfig("127.0.0.1:8080:/unix/path/config.yaml", DEFAULT_HOST);
-        Assert.assertEquals("127.0.0.1", config.host);
-        Assert.assertEquals("/unix/path/config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        configs = JavaAgent.parseConfig("127.0.0.1:8080:/unix/path/config.yaml", DEFAULT_HOST);
+        Assert.assertEquals("127.0.0.1", configs[0].host);
+        Assert.assertEquals("/unix/path/config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
 
-        config = JavaAgent.parseConfig("8080:\\Windows\\Local\\Drive\\Path\\config.yaml", DEFAULT_HOST);
-        Assert.assertEquals(DEFAULT_HOST, config.host);
-        Assert.assertEquals("\\Windows\\Local\\Drive\\Path\\config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
-
-        // the following check was previously failing to parse the file correctly
-        config = JavaAgent.parseConfig("8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
-        Assert.assertEquals(DEFAULT_HOST, config.host);
-        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        configs = JavaAgent.parseConfig("8080:\\Windows\\Local\\Drive\\Path\\config.yaml", DEFAULT_HOST);
+        Assert.assertEquals(DEFAULT_HOST, configs[0].host);
+        Assert.assertEquals("\\Windows\\Local\\Drive\\Path\\config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
 
         // the following check was previously failing to parse the file correctly
-        config = JavaAgent.parseConfig("google.com:8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
-        Assert.assertEquals("google.com", config.host);
-        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        configs = JavaAgent.parseConfig("8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
+        Assert.assertEquals(DEFAULT_HOST, configs[0].host);
+        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
 
         // the following check was previously failing to parse the file correctly
-        config = JavaAgent.parseConfig("127.0.0.1:8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
-        Assert.assertEquals("127.0.0.1", config.host);
-        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        configs = JavaAgent.parseConfig("google.com:8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
+        Assert.assertEquals("google.com", configs[0].host);
+        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
+
+        // the following check was previously failing to parse the file correctly
+        configs = JavaAgent.parseConfig("127.0.0.1:8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
+        Assert.assertEquals("127.0.0.1", configs[0].host);
+        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
+
+
+        // the following check was previously failing to parse the file correctly
+        configs = JavaAgent.parseConfig("127.0.0.1:8080:C:\\Windows\\Path\\config.yaml|", DEFAULT_HOST);
+        Assert.assertEquals("127.0.0.1", configs[0].host);
+        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
+
+        // the following check was previously failing to parse the file correctly
+        configs = JavaAgent.parseConfig("127.0.0.1:8080:C:\\Windows\\Path\\config.yaml|127.0.0.2:8081:\\Windows\\Local\\Drive\\Path\\config.yaml", DEFAULT_HOST);
+        Assert.assertEquals("127.0.0.1", configs[0].host);
+        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
+
+        Assert.assertEquals("127.0.0.2", configs[1].host);
+        Assert.assertEquals("\\Windows\\Local\\Drive\\Path\\config.yaml", configs[1].file);
+        Assert.assertEquals(8081, configs[1].port);
     }
 
     /**
@@ -196,14 +213,14 @@ public class JavaAgentIT {
     public void testIpv6AddressParsing() {
         final String DEFAULT_HOST = "0.0.0.0";
 
-        JavaAgent.Config config = JavaAgent.parseConfig("[1:2:3:4]:8080:config.yaml", DEFAULT_HOST);
-        Assert.assertEquals("[1:2:3:4]", config.host);
-        Assert.assertEquals("config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        JavaAgent.Config[] configs = JavaAgent.parseConfig("[1:2:3:4]:8080:config.yaml", DEFAULT_HOST);
+        Assert.assertEquals("[1:2:3:4]", configs[0].host);
+        Assert.assertEquals("config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
 
-        config = JavaAgent.parseConfig("[2001:0db8:0000:0042:0000:8a2e:0370:7334]:8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
-        Assert.assertEquals("[2001:0db8:0000:0042:0000:8a2e:0370:7334]", config.host);
-        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", config.file);
-        Assert.assertEquals(8080, config.port);
+        configs = JavaAgent.parseConfig("[2001:0db8:0000:0042:0000:8a2e:0370:7334]:8080:C:\\Windows\\Path\\config.yaml", DEFAULT_HOST);
+        Assert.assertEquals("[2001:0db8:0000:0042:0000:8a2e:0370:7334]", configs[0].host);
+        Assert.assertEquals("C:\\Windows\\Path\\config.yaml", configs[0].file);
+        Assert.assertEquals(8080, configs[0].port);
     }
 }
